@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Công Cụ Image & Text Hữu Ích</title>
+  <meta name="theme-color" content="#a8edea">
+  <meta name="apple-mobile-web-app-title" content="Công Cụ Image & Text">
+  <link rel="manifest" href="manifest.json">
+  <script src="pwa-core.js"></script>
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+  <!-- CSS OVERLAY -->
+  <style>
+    /* Backdrop – làm mờ trang chủ */
+    #pwaOverlay {
+      position: fixed; inset: 0; z-index: 99998;
+      background: rgba(0,0,0,.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+      animation: _overlayIn .3s ease both;
+    }
+    @keyframes _overlayIn {
+      from { opacity: 0 }
+      to   { opacity: 1 }
+    }
+
+    /* Card giữa màn hình */
+    #pwaCard {
+      background: #fff;
+      width: 100%; max-width: 400px;
+      border-radius: 24px;
+      padding: 32px 24px 28px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.35);
+      animation: _cardIn .4s cubic-bezier(.34,1.4,.64,1) both;
+      font-family: inherit;
+    }
+    @keyframes _cardIn {
+      from { opacity: 0; transform: scale(.88) translateY(20px) }
+      to   { opacity: 1; transform: scale(1) translateY(0) }
+    }
+    /* Header */
+    .pwa-header {
+      display: flex; align-items: center; gap: 14px;
+      margin-bottom: 16px;
+    }
+    .pwa-icon {
+      width: 56px; height: 56px; border-radius: 14px;
+      background: linear-gradient(135deg,#e91e63,#c2185b);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; flex-shrink: 0;
+      box-shadow: 0 4px 14px rgba(194,24,91,.35);
+    }
+    .pwa-app-name { font-size: 18px; font-weight: 800; color: #222; }
+    .pwa-app-desc { font-size: 13px; color: #888; margin-top: 2px; }
+
+    .pwa-divider { height: 1px; background: #f0f0f0; margin: 16px 0; }
+
+    /* Steps iOS */
+    .pwa-step {
+      display: flex; align-items: flex-start; gap: 12px;
+      margin-bottom: 14px;
+    }
+    .pwa-step-num {
+      width: 26px; height: 26px; border-radius: 50%;
+      background: #fce4ec; color: #c2185b;
+      font-weight: 800; font-size: 13px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .pwa-step-text { font-size: 14px; color: #333; line-height: 1.6; }
+    .pwa-step-text b { color: #c2185b; }
+
+    /* Cảnh báo iOS */
+    .pwa-warn {
+      background: #fff8e1; border-left: 3px solid #ffc107;
+      border-radius: 8px; padding: 10px 12px;
+      font-size: 13px; color: #795548; font-weight: 600;
+      margin-bottom: 18px;
+    }
+
+    /* Nút cài lớn */
+    #pwaBigInstall {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg,#e91e63,#c2185b); 
+      color: #fff; border: none; border-radius: 14px;
+      font-size: 17px; font-weight: 800;
+      cursor: pointer; box-shadow: 0 8px 24px rgba(194,24,91,.4);
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      transition: transform .15s, box-shadow .15s;    }
+    #pwaBigInstall:active {
+      transform: scale(.97);
+      box-shadow: 0 4px 12px rgba(194,24,91,.3);
+    }
+
+    /* Nút "Để sau" */
+    .pwa-dismiss {
+      display: table;
+      margin: 14px auto 0;
+      font-size: 13px;
+      color: #28a745;
+      border: 1px solid #28a745;
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      padding: 6px 14px;
+      background: transparent;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+    .pwa-dismiss:hover {
+      background: #28a745;
+      color: #fff;
+    }
+
+    /* Badge */
+    .pwa-badge {
+      display: inline-block;
+      background: #e8f5e9; color: #2e7d32;
+      font-size: 11px; font-weight: 700;
+      border-radius: 6px; padding: 2px 8px;
+      margin-left: 8px; vertical-align: middle;
+    }
+
+    /* 🎨 Style cho trang link */
+    body {
+      margin: 0; padding: 20px;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #fafafa;
+    }
+    .link-card {
+      max-width: 600px; margin: 40px auto;
+      padding: 24px; background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    }
+            body {
+      margin: 0;
+      padding: 5 20px 20px; /* Giữ padding trái/phải/dưới 20px, nhưng loại bỏ padding-top (0) */
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #fafafa;
+    }
+    
+    h1 {
+      text-align: center;
+      margin: 0 0 12px; /* margin-top = 0 để sát đầu */
+      text-shadow: 2px 2px 2px rgba(0, 0, 0, 1.00);
+      padding: 15px 15px;
+      background: linear-gradient(225deg, #008EFF, #86F9D3, #AFF9FF, #F8F9D6, #FFAAFF, #AFF9FF, #008EFF);
+      border-radius: 8px;
+      color: #00C1FF;
+      font-size: 25px;
+    }
+
+    .link-card {
+      max-width: 600px;
+      margin: 0 auto 40px; /* margin-top = 0 để sát ngay dưới tiêu đề */
+      padding: 24px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,.08);
+    }
+
+      
+    .link-item {
+      display: block;
+      padding: 10px 10px;
+      margin: 12px 0;
+      background: linear-gradient(135deg, #f8f9fa, #fff);
+      border-radius: 8px;
+      text-decoration: none;
+      color: #111;
+      font-weight: 500;
+      border: 1px solid #eee;
+      transition: all .2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .link-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0,0,0,.1);
+      border-color: #c2185b;
+    }
+    .link-item .emoji { font-size: 20px; }
+    .link-item .desc {
+      font-size: 13px; color: #666;
+      font-weight: 400; margin-top: 2px;
+    }
+    /* ── BACKGROUND CARO XÉO ───────────────── */
+.bg-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%,   rgba(37,99,235,0.10) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 90% 100%,  rgba(30,58,138,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 10% 80%,   rgba(37,99,235,0.07) 0%, transparent 60%),
+    var(--bg);
+  pointer-events: none;
+}
+
+    .bg-pattern {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.09; /* Tăng từ 0.045 lên 0.08 để đậm hơn */
+      background-image:
+        repeating-linear-gradient(45deg, #000055 0, #000055 1.1px, transparent 0, transparent 50%), /* Tăng độ dày từ 1px lên 1.2px */
+        repeating-linear-gradient(-45deg, #000055 0, #000055 1.1px, transparent 0, transparent 50%);
+      background-size: 6px 6px;
+      pointer-events: none;
+    }
+
+    .bg-layer,
+.bg-pattern {
+  z-index: -1;
+}
+  </style>
+</head>
+<body>
+<div class="bg-layer"></div>
+<div class="bg-pattern"></div>
+  <!-- 📌 NỘI DUNG TRANG LINK -->
+  <h1>🛠️ Các Công Cụ Hữu Ích</h1>
+  <div class="link-card">
+        
+    <a href="https://www.remove.bg/vi" class="link-item" target="_blank" rel="noopener">
+      <span class="emoji">✂️</span>
+      <div>
+        <div>Remove.bg</div>
+        <div class="desc">Xóa nền ảnh tự động trong 5 giây</div>
+      </div>
+    </a>
+    
+    <a href="https://ktdb.com.vn/" class="link-item" target="_blank" rel="noopener">
+      <span class="emoji">🔤</span>
+      <div>
+        <div>Ktdb.com.vn</div>
+        <div class="desc">Tạo Kí Tự Đẹp Online Miễn Phí</div>
+      </div>    </a>
+      
+      <a href="https://kitu.vn/" class="link-item" target="_blank" rel="noopener">
+      <span class="emoji">🏇</span>
+      <div>
+        <div>Kitu.vn</div>
+        <div class="desc">Web tạo tên kí tự đặc biệt</div>
+      </div>    </a>
+
+    <!-- ➕ Thêm link mới tại đây -->
+    <!--
+    <a href="https://ktdb.com.vn/" class="link-item" target="_blank" rel="noopener">
+      <span class="emoji">🔗</span>
+      <div>
+        <div>Tên Link</div>
+        <div class="desc">Mô tả ngắn về công cụ này</div>
+      </div>    </a>
+    -->
+  </div>
+
+  <!-- 🔹 ĐOẠN C: HTML + JS OVERLAY (dán trước </body>) -->
+  <div id="pwaOverlay" style="display:none">
+    <div id="pwaCard">
+      <div style="text-align:center; margin-bottom:20px;">
+        <div class="pwa-icon" style="margin:0 auto 14px; width:72px; height:72px; font-size:36px; border-radius:20px;">📲</div>
+        <div class="pwa-app-name" style="font-size:20px; color:#0000FF;">RemoveBG</div>
+        <div class="pwa-app-desc">Truy cập nhanh công cụ xóa nền ảnh</div>
+        <span class="pwa-badge" style="margin: 8px 0 0; display:inline-block;">Lưu hành nội bộ</span>
+      </div>
+
+      <div class="pwa-divider"></div>
+
+      <!-- Android / Desktop -->
+      <div id="pwaBlockAndroid">
+        <div style="font-size:16px;color:#0000FF;margin-bottom:18px;line-height:1.6; text-align: center;">
+          Cài lên màn hình chính <br>Y như một ứng dụng <br> (không cần app store)
+        </div>
+        <button id="pwaBigInstall">
+          <span style="font-size:22px">📥</span> Cài đặt ứng dụng
+        </button>
+        <div style="margin-top:14px;font-size:12px;color:#aaa;line-height:1.6;text-align:center;">
+          ✅ Sau khi cài xong, hãy mở app từ màn hình chính — không cần vào link này nữa. <br>
+          🗑️ Để gỡ cài đặt: Kích chuột phải vào icon app → <b>Gỡ cài đặt</b> (PC) hoặc giữ icon → <b>Xoá</b> (Android)
+        </div>
+      </div>
+
+      <!-- iOS -->
+      <div id="pwaBlockIOS" style="display:none">
+        <div class="pwa-warn">
+          ⚠️ Phải mở bằng <b style="color:#c2185b">Safari</b> — không dùng Chrome, Zalo, Facebook
+        </div>
+        <div>
+          <div class="pwa-step">
+            <div class="pwa-step-num">1</div>
+            <div class="pwa-step-text">Nhấn nút <b>Chia sẻ</b> 📤 ở thanh Safari phía dưới</div>
+          </div>
+          <div class="pwa-step">
+            <div class="pwa-step-num">2</div>
+            <div class="pwa-step-text">Cuộn xuống, chọn <b>"Thêm vào Màn hình chính"</b> 🏠</div>
+          </div>
+          <div class="pwa-step">
+            <div class="pwa-step-num">3</div>
+            <div class="pwa-step-text">Nhấn <b>"Thêm"</b> ở góc trên bên phải ✅</div>
+          </div>
+        </div>
+        <div style="margin-top:4px;font-size:12px;color:#aaa;line-height:1.6;">          ✅ Sau khi cài xong, mở app từ màn hình chính — không cần vào link này nữa. <br>
+          🗑️ Gỡ cài đặt: giữ icon app → <b>Xoá bookmark</b>
+        </div>
+      </div>
+
+      <div class="pwa-dismiss" onclick="dismissPwaOverlay()">Để sau</div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const _isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const _isStandalone = window.matchMedia('(display-mode: standalone)').matches
+                          || window.navigator.standalone;
+
+      if (_isStandalone) return;
+
+      function showPwaOverlay(type) {
+        var o = document.getElementById('pwaOverlay');
+        document.getElementById('pwaBlockAndroid').style.display = type === 'android' ? 'block' : 'none';
+        document.getElementById('pwaBlockIOS').style.display = type === 'ios' ? 'block' : 'none';
+        o.style.display = 'flex';
+        var c = document.getElementById('pwaCard');
+        c.style.animation = 'none';
+        c.offsetHeight;
+        c.style.animation = '';
+      }
+
+      window.dismissPwaOverlay = function () {
+        var o = document.getElementById('pwaOverlay');
+        o.style.opacity = '0';
+        o.style.transition = 'opacity .25s ease';
+        setTimeout(function () {
+          o.style.display = 'none';
+          o.style.opacity = '';
+          o.style.transition = '';
+        }, 260);
+      };
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('sw.js').then(function (reg) {
+            reg.addEventListener('updatefound', function () {
+              var nw = reg.installing;
+              nw.addEventListener('statechange', function () {
+                if (nw.state === 'installed' && navigator.serviceWorker.controller) {
+                  if (confirm('🔄 Đã có phiên bản mới! Nhấn OK để cập nhật.')) {
+                    window.location.reload();
+                  }
+                }              });
+            });
+          });
+        });
+      }
+
+      var _pwaPrompt = null;
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault();
+        _pwaPrompt = e;
+        if (_isIOS) return;
+
+        setTimeout(function () { showPwaOverlay('android'); }, 1000);
+
+        document.getElementById('pwaBigInstall').addEventListener('click', async function () {
+          dismissPwaOverlay();
+          _pwaPrompt.prompt();
+          await _pwaPrompt.userChoice;
+          _pwaPrompt = null;
+        });
+      });
+
+      window.addEventListener('appinstalled', function () { dismissPwaOverlay(); });
+
+      if (_isIOS) {
+        window.addEventListener('load', function () {
+          setTimeout(function () { showPwaOverlay('ios'); }, 1500);
+        });
+      }
+    })();
+  </script>
+
+</body>
+</html>
